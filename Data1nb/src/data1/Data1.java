@@ -14,21 +14,43 @@ public class Data1 {
     public interface BST {
     
         public Boolean isEmptyHuh();
+        //determines if t is empty
+        
+        
+        //So since essentially this just gives me a leaf, should i code it only
+        //in the leaf class? Should this method even be in the BST class, or 
+        //just in the leaf class? 
+        public BST empty();
+        //Returns a fresh empty set
+        
+        public int cardinality();
+        //returns the number of elements in bst
     
    /*   
-        public int cardinality();
+        
+        
+//         (cardinality t) → integer
+//         t : finite-set
+//         Returns the number of elements in t.
+
 
 	public Boolean member(int x);
+        //
 
 	public BST add(int x);
+        //
 
 	public BST remove(int x);
+        //
     
-	public int cardinality();
+	public BST union(bst1 bst2);
+        //
     
 	public BST successor();
+        //
     
 	public BST minimum();*/
+        //
     
     }      
     
@@ -47,18 +69,34 @@ public class Data1 {
         public Boolean isEmptyHuh(){
             return false;
         }
+        
+        public BST empty(){
+            return new Leaf();
+        }
+        
+        public int cardinality(){
+            return 1 + left.cardinality() + right.cardinality();
+        }
     }
     
     class Leaf implements BST{
         int key;
         
         
-        Leaf(int key){
-            this.key = key;
+        
+        Leaf(){
         }
         
         public Boolean isEmptyHuh(){
             return true;
+        }
+        
+        public BST empty(){
+            return new Leaf();
+        }
+        
+        public int cardinality(){
+            return 0;
         }
     }
 }
