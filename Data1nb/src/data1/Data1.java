@@ -1,6 +1,7 @@
 package data1;
 
 import java.util.Random;
+import java.lang.Math;
 
 public class Data1 {
 
@@ -24,20 +25,133 @@ public class Data1 {
     public static BST generateSet(int upperLimit, int numberOfElements) {
         BST set = new Leaf();
         Random rand = new Random();
+        int randy = rand.nextInt(upperLimit);
         for (int i = 0; i < numberOfElements; i++) {
-            set = set.add(rand.nextInt(upperLimit));
+            while (set.member(randy)) {
+                randy = rand.nextInt(upperLimit);
+            }
+            set = set.add(randy);
 
         }
         return set;
     }
 
+
     public static void main(String[] args) {
         int upperLimit = 500;
-        int numberOfElements = 10;
+        int numberOfElements = 15;
+        int noElements = 0;
+        int numberOfTests = 100;
+        Boolean tP = true;
 
-        System.out.println("Generating random set, upper bound: " + upperLimit + ", number of elements: " + numberOfElements);
-        generateSet(upperLimit, numberOfElements).toString();
+        System.out.println("Generating empty set and testing isEmptyHuh "
+                + numberOfTests + " times...");
+        for (int i = 0; i < numberOfTests; i++) {
+            tP &= generateSet(upperLimit, noElements).isEmptyHuh();
+            if (tP == false) {
+                System.out.println("*Test for isEmptyHuh failed on iteration number " + i);
+                tP = true;
+            }
+        }
+        System.out.println("isEmptyHuh testing complete, if no errors, all passed.");
 
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing cardinality " + numberOfTests + " times...");
+        for (int i = 0; i < numberOfTests; i++) {
+            tP &= numberOfElements
+                    == generateSet(upperLimit, numberOfElements).cardinality();
+            if (tP == false) {
+                System.out.println("*Test for cardinality failed on iteration number " + i);
+            }
+            tP = true;
+        }
+        System.out.println("cardinality testing complete, if no errors, all passed.");
+
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing equality " + numberOfTests + " times...");
+
+        for (int i = 0; i < numberOfTests; i++) {
+            BST testSet = generateSet(upperLimit, numberOfElements);
+            tP &= testSet.equal(testSet);
+            if (tP == false) {
+                System.out.println("*Test for equality failed on iteration number " + i);//+", failed bst printed: "+testSet.toString());
+            }
+            tP = true;//else System.out.println("passing bst for equality: "+testSet.toString());
+        }
+        System.out.println("equal testing complete, if no errors, all passed.");
+
+//        
+//        System.out.println("Generating random set of length "+numberOfElements+
+//                " and testing subset "+numberOfTests+" times...");
+//        for(int i = 0; i<numberOfTests;i++){
+//            //come back to here
+//        }
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing diff " + numberOfTests + " times...");
+
+        for (int i = 0; i < numberOfTests; i++) {
+            BST testSet = generateSet(upperLimit, numberOfElements);
+            BST originalSet = testSet;
+            int randy = (int) Math.floor(Math.random() * upperLimit);
+            testSet = testSet.add(randy);
+            BST diffSet = testSet.diff(originalSet);
+            tP = (diffSet.cardinality() == 1) && (diffSet.remove(randy).cardinality() == 0);
+            if (tP == false) {
+                System.out.println("*Test for diff failed on iteration number " + i);
+            }
+            tP = true;
+        }
+        System.out.println("diff testing complete, if no errors, all passed.");
+
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing add/member " + numberOfTests + " times...");
+        for (int i = 0; i < numberOfTests; i++) {
+            BST testSet = generateSet(upperLimit, numberOfElements);
+            int randy = (int) Math.floor(Math.random() * upperLimit);
+            testSet = testSet.add(randy);
+            tP &= testSet.member(randy);
+            if (tP == false) {
+                System.out.println("*Test for add/member failed on iteration number " + i);
+            }
+            tP = true;
+        }
+        System.out.println("add/member testing complete, if no errors, all passed.");
+
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing remove " + numberOfTests + " times...");
+        for (int i = 0; i < numberOfTests; i++) {
+            BST testSet = generateSet(upperLimit, numberOfElements);
+            int randy = (int) Math.floor(Math.random() * upperLimit);
+            testSet.add(randy);
+            testSet.remove(randy);
+            tP &= testSet.member(randy) == false;
+            if (tP == false) {
+                System.out.println("*Test for remove failed on iteration number " +i+" failed on: "+
+                        randy);
+            }
+            tP = true;
+
+        }
+        System.out.println("remove testing complete, if no errors all passed.");
+
+        System.out.println("Generating random set of length " + numberOfElements
+                + " and testing inter " + numberOfTests + " times...");
+        for (int i = 0; i < numberOfTests; i++){
+            BST testSet = generateSet(upperLimit, numberOfElements);
+            BST originalSet = testSet;
+            int randy = (int) Math.floor(Math.random() * upperLimit);
+            testSet.add(randy);
+            tP &= testSet.inter(originalSet).member(randy) == false;
+            if(tP == false){
+                System.out.println("*Test for inter failed on iteration number "+i);
+            } tP = true;
+        }
+
+        //("Generating random set, upper bound: " + upperLimit +
+        //        ", number of elements: " + numberOfElements+"...");
+        //generateSet(upperLimit, numberOfElements).toString();
+        //System.out.println("Testing isEmptyHuh...");
+        //generateSet(upperLimit, noElements).toString();
     }
 
     public interface BST {
@@ -142,7 +256,7 @@ public class Data1 {
          */
         public BST add(int x) {
             if (this.key == x) {
-                return new Branch(this.left, this.key, this.right);
+                return this; //new Branch(this.left, this.key, this.right);
             } else if (this.key > x) {
                 return new Branch(this.left.add(x), this.key, this.right);
             } else /*if(this.key < x)*/ {
@@ -153,7 +267,7 @@ public class Data1 {
 
         public BST remove(int x) {
             if (this.key == x) {
-                return this.left.union(this.right);
+                return this.right.union(this.left);
             } else if (this.key > x) {
                 return new Branch(this.left.remove(x), this.key, this.right);
             } else /*if(this.key < x)*/ {
@@ -193,14 +307,8 @@ public class Data1 {
         //creates a new branch from any items that are not found to be common,
         //maintains purity by returning a fresh new BST
         public BST diff(BST bst) {
-            if (bst.member(this.key)) {
-                return this.remove(this.key).diff(bst);
-            } else {
-                return new Branch(this.left.diff(bst),
-                        this.key, this.right.diff(bst));
+                return this.remove(this.key).diff(bst.remove(this.key));
             }
-        }
-
         //if two sets are equal then their difference should be nothing, so this
         //method tries to find that quickly by just calling the diff method and
         //checking to see if it is empty, it calls it in both directions to 
@@ -270,7 +378,7 @@ public class Data1 {
         }
 
         public BST diff(BST bst) {
-            return this;
+            return bst;
         }
 
         //if this leaf based method of equal is called then if the bst is also
