@@ -32,26 +32,23 @@ public class Data1 {
         //returns the number of elements in bst
     
         public Boolean member(int x);
-        //returns true if x is a member of BST
-   /*   
-
-	public Boolean member(int x);
-        //
+        //returns true if x is a member of BST 
 
 	public BST add(int x);
-        //
 
 	public BST remove(int x);
-        //
-    
-	public BST union(bst1 bst2);
-        //
-    
-	public BST successor();
-        //
-    
-	public BST minimum();*/
-        //
+        
+        public BST union(BST bst);
+        
+        /*
+        public BST intersection(BST bst);
+        
+        public BST difference(BST bst);
+        
+        public Boolean equal(BST bst);
+        
+	public Boolean subset(BST bst);
+            */
     
     }      
     
@@ -105,6 +102,47 @@ public class Data1 {
                 return left.member(x);
             } else return right.member(x);
         }
+        
+      /*
+        first the add function checks to see if the key already exists within
+        the target, if so, it just returns a fresh copy of the current BST to
+        preserve purity, but im not sure if this is necessary, or if just 
+        returning an unmodified version of the initial tree is pure. Afterwards
+        it checks inequalities to determine if the new value should be added to 
+        the left or right, left if the value is less than the key, right if its
+        greater, and the function calls itself, until it hits a leaf, then 
+        injects itself in the proper locale to preserve the BST structure, the
+        function creates a new branch in every case, so purity is maintained
+        */
+        public BST add(int x){
+            if(this.key == x){
+                return new Branch(this.left, this.key, this.right);
+            } else if(this.key > x){
+                return new Branch(this.left.add(x), this.key, this.right);
+            } else /*if(this.key < x)*/{
+                return new Branch(this.left, this.key, this.right.add(x));
+                
+            }
+        }
+        
+        public BST remove(int x){
+            if(this.key == x){
+                return this.left.union(this.right);
+            }else if(this.key > x){
+                return new Branch(this.left.remove(x), this.key, this.right);
+            }else /*if(this.key < x)*/{
+                return new Branch(this.left, this.key, this.right.remove(x));
+            }
+        }
+        
+        
+        //Nick Burka helped me with my union method since i hadn't been able
+        //to figure it out, I called him and he came over and explained his 
+        //implementation to me super thoroughly, so now I understand what goes
+        //on much better, please give him a participation/helper point!
+        public BST union(BST bst){
+            return bst.union(this.left).union(this.right).add(this.key);
+        }
     }
     
     class Leaf implements BST{
@@ -134,6 +172,18 @@ public class Data1 {
         //so member will always return false on a leaf
         public Boolean member(int x){
             return false;
+        }
+        
+        public BST add(int x){
+            return new Branch(this, x, this);
+        }
+        
+        public BST remove(int x){
+            return this;
+        }
+        
+        public BST union(BST bst){
+            return bst;
         }
     }
 }
