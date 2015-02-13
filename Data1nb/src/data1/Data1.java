@@ -40,19 +40,23 @@ public class Data1 {
         
         public BST union(BST bst);
         
-        /*
-        public BST intersection(BST bst);
+        public BST inter(BST bst);
         
-        public BST difference(BST bst);
+        public BST diff(BST bst);
         
         public Boolean equal(BST bst);
         
-	public Boolean subset(BST bst);
-            */
+        public Boolean subset(BST bst);
     
     }      
     
     class Branch implements BST{
+        
+        public String toString(){
+            return 
+                    "Branch(" + this.left + ","
+                        + this.key + "," + this.right + ")" ;
+        }
     
         BST left;
         int key;
@@ -140,15 +144,67 @@ public class Data1 {
         //to figure it out, I called him and he came over and explained his 
         //implementation to me super thoroughly, so now I understand what goes
         //on much better, please give him a participation/helper point!
+        //This method first goes until it hits the leftmost leaf, then checks
+        //to the right from there, hits a leaf and then adds the key to the 
+        //target set, it maintains purity since add is a pure method. This 
+        //process continues, hitting the bottom of this.left and this.right 
+        //adding this.key to bst, until all of this has been added onto bst,
+        //producing an entirely new BST, thereby maintaining purity
         public BST union(BST bst){
             return bst.union(this.left).union(this.right).add(this.key);
         }
+        
+        //checks to see if this.key is a member of bst, if yes it purely returns
+        //a new branch, calling itself recursively on both children and putting
+        //in the key. If this.key is not a member of bst, it calls remove on
+        //the key, and then recursively calls itself. When inter hits a leaf it
+        //returns this 
+        public BST inter(BST bst){
+            if(bst.member(this.key)){
+                return new Branch(this.left.inter(bst), 
+                                    this.key, this.right.inter(bst));
+            } else return this.remove(this.key).inter(bst);
+        }
+        
+        //pretty much an inverse of union, removes things that are in common,
+        //creates a new branch from any items that are not found to be common,
+        //maintains purity by returning a fresh new BST
+        public BST diff(BST bst){
+            if(bst.member(this.key)){
+                return this.remove(this.key).diff(bst);
+            }else 
+                return new Branch(this.left.diff(bst),
+                                    this.key, this.right.diff(bst));
+        }
+        
+        //if two sets are equal then their difference should be nothing, so this
+        //method tries to find that quickly by just calling the diff method and
+        //checking to see if it is empty, it calls it in both directions to 
+        //avoid false positives or negatives based on supersets and subsets
+        public Boolean equal(BST bst){
+            return (bst.diff(this).isEmptyHuh()
+                        &&
+                        this.diff(bst).isEmptyHuh());
+        }
+        
+        //if all elements of this are members of the target, bst, then this is
+        //a subset.
+        public Boolean subset(BST bst){
+            return bst.member(this.key)
+                    && subset(this.left)
+                    && subset(this.right);
+        }
+        
     }
     
     class Leaf implements BST{
         
         //a leaf is like the equivalent of an empty set for this data structure
         Leaf(){
+        }
+        
+        public String toString(){
+            return "Leaf";
         }
         
         //a leaf has no key, so it always returns true for isEmptyHuh
@@ -185,5 +241,25 @@ public class Data1 {
         public BST union(BST bst){
             return bst;
         }
+        
+        public BST inter(BST bst){
+            return this;
+        }
+        
+        public BST diff(BST bst){
+            return this;
+        }
+        
+        //if this leaf based method of equal is called then if the bst is also
+        //a leaf then they are equal.
+        public Boolean equal(BST bst){
+            return bst.isEmptyHuh();
+        }
+        
+        //the empty set is a subset of all sets, so always true
+        public Boolean subset(BST bst){
+            return true;
+        }
+        
     }
 }
